@@ -14,13 +14,14 @@ class Claude2 extends Provider {
 	}
 
 	static handleSubmit() {
-		this.getWebview().executeJavaScript(`
+		this.getWebview().executeJavaScript(`{
 		var btn = document.querySelector("button[aria-label*='Send Message']"); // subsequent screens use this
     if (!btn) var btn = document.querySelector('button:has(div svg)'); // new chats use this
     if (!btn) var btn = document.querySelector('button:has(svg)'); // last ditch attempt
 		btn.focus();
     btn.disabled = false;
-    btn.click()`);
+    btn.click();
+  }`);
 	}
 
 	static handleCss() {

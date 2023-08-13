@@ -19,13 +19,27 @@ import Smol from '../providers/smol';
 import React, { useState } from 'react';
 import Split from 'react-split';
 
+function updateSplitSizes(panes: any[], focalIndex = null) {
+  // Handle specific pane focus
+  if (focalIndex !== null) {
+    let sizes = new Array(panes.length).fill(0);
+    sizes[focalIndex] = 100 - 0 * (panes.length - 1);
+    return sizes;
+  }
+
+  // Evenly distribute remaining space among all panes
+  let remainingPercentage = 100 / panes.length;
+  let sizes = new Array(panes.length).fill(remainingPercentage);
+  return sizes;
+}
+
 function Hello() {
   const providers = {
     OpenAi,
     Bard,
     Bing,
     // Claude,
-    // Claude2,
+    Claude2,
     // Together,
     // Perplexity,
     // Phind,
@@ -52,11 +66,38 @@ function Hello() {
     }
   }, [enabledProviders, superprompt]);
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    console.log('submitting');
+    console.log('submitting');
+    console.log('submitting');
+    console.log('submitting');
+    console.log('submitting');
+    console.log('submitting');
+    console.log('submitting');
+    console.log('submitting');
     e.preventDefault();
     enabledProviders.forEach((provider) => {
       // Call provider-specific CSS handling and custom paste setup
       provider.handleSubmit(superprompt);
     });
+  }
+  const formRef = React.useRef<HTMLFormElement>(null);
+  const SuperPromptEnterKey = window.electron.electronStore.get(
+    'SuperPromptEnterKey',
+    false
+  );
+  function enterKeyHandler(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    const isCmdOrCtrl = event.metaKey || event.ctrlKey;
+    const isEnter = event.key === 'Enter';
+
+    // console.log({ SuperPromptEnterKey, isEnter, isCmdOrCtrl });
+    if ((SuperPromptEnterKey && isEnter) || (isCmdOrCtrl && isEnter)) {
+      event.preventDefault();
+      console.log('superprompt!');
+      formRef.current?.submit();
+    }
+    // if (isEnter) {
+    //   event.preventDefault();
+    // }
   }
   const sizes = updateSplitSizes(enabledProviders);
   return (
@@ -71,6 +112,7 @@ function Hello() {
         dragInterval={1}
         direction="horizontal"
         // cursor="col-resize"
+        className="flex"
       >
         {enabledProviders.map((provider) => (
           <div key={provider.paneId()} className="page darwin">
@@ -83,13 +125,14 @@ function Hello() {
           </div>
         ))}
       </Split>
-      <form id="form" className="" onSubmit={handleSubmit}>
+      <form ref={formRef} id="form" className="" onSubmit={handleSubmit}>
         <div id="form-wrapper">
           <textarea
             rows={4}
             id="prompt"
             value={superprompt}
             onChange={(e) => setSuperprompt(e.target.value)}
+            onKeyDown={enterKeyHandler}
             name="prompt"
             placeholder="Enter a superprompt here.
   - Quick Open: Cmd+G or Submit: Cmd/Ctrl+Enter (customizable in menu)
@@ -126,18 +169,4 @@ export default function App() {
       </Routes>
     </Router>
   );
-}
-
-function updateSplitSizes(panes: any[], focalIndex = null) {
-  // Handle specific pane focus
-  if (focalIndex !== null) {
-    let sizes = new Array(panes.length).fill(0);
-    sizes[focalIndex] = 100 - 0 * (panes.length - 1);
-    return sizes;
-  }
-
-  // Evenly distribute remaining space among all panes
-  let remainingPercentage = 100 / panes.length;
-  let sizes = new Array(panes.length).fill(remainingPercentage);
-  return sizes;
 }
