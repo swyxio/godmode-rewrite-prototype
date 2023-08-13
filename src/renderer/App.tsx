@@ -17,6 +17,7 @@ import HuggingChat from '../providers/huggingchat';
 import OobaBooga from '../providers/oobabooga';
 import Smol from '../providers/smol';
 import React, { useState } from 'react';
+import Split from 'react-split';
 
 function Hello() {
   const providers = {
@@ -57,9 +58,20 @@ function Hello() {
       provider.handleSubmit(superprompt);
     });
   }
+  const sizes = updateSplitSizes(enabledProviders);
   return (
     <div>
-      <div id="webviewContainer" className="split">
+      <Split
+        sizes={sizes}
+        minSize={100}
+        expandToMin={false}
+        gutterSize={3}
+        gutterAlign="center"
+        snapOffset={30}
+        dragInterval={1}
+        direction="horizontal"
+        // cursor="col-resize"
+      >
         {enabledProviders.map((provider) => (
           <div key={provider.paneId()} className="page darwin">
             <webview
@@ -70,7 +82,7 @@ function Hello() {
             />
           </div>
         ))}
-      </div>
+      </Split>
       <form id="form" className="" onSubmit={handleSubmit}>
         <div id="form-wrapper">
           <textarea
@@ -114,4 +126,18 @@ export default function App() {
       </Routes>
     </Router>
   );
+}
+
+function updateSplitSizes(panes: any[], focalIndex = null) {
+  // Handle specific pane focus
+  if (focalIndex !== null) {
+    let sizes = new Array(panes.length).fill(0);
+    sizes[focalIndex] = 100 - 0 * (panes.length - 1);
+    return sizes;
+  }
+
+  // Evenly distribute remaining space among all panes
+  let remainingPercentage = 100 / panes.length;
+  let sizes = new Array(panes.length).fill(remainingPercentage);
+  return sizes;
 }
